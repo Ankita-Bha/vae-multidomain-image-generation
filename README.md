@@ -1,3 +1,51 @@
+# VAE Multidomain Image Generation
+
+## Overview
+This project explores **image generation and representation learning** using a **Variational Autoencoder (VAE)**.  
+The primary focus is not only on generating images, but on understanding **how latent spaces are learned** and how they can be **controlled and interpreted**.
+
+The project emphasizes clarity, explainability, and research-aligned experimentation over purely aesthetic results.
+
+---
+
+## Key Objectives
+- Build a CNN-based Variational Autoencoder for image generation
+- Analyze the structure and behavior of the learned latent space
+- Demonstrate controlled image generation via latent traversal
+- Study trade-offs between reconstruction quality and latent regularization
+
+---
+
+## Datasets
+The project uses standard benchmark datasets commonly employed in generative modeling research:
+
+- **MNIST** – handwritten digits
+- **FashionMNIST** – grayscale clothing images
+
+All datasets are 28×28 grayscale, making them suitable for controlled experimentation and latent space analysis.
+
+---
+
+## Model Architecture
+The core model is a **Convolutional Variational Autoencoder** consisting of:
+
+- **Encoder**
+  - Convolutional layers for feature extraction
+  - Outputs mean (μ) and log-variance (logσ²)
+
+- **Latent Space**
+  - 32-dimensional continuous representation
+  - Enables smooth interpolation and sampling
+
+- **Decoder**
+  - Reconstructs images from latent vectors
+  - Generates new images via sampling
+
+---
+
+## Training Objective
+The model is trained using a composite loss function:
+
 
 - **Reconstruction Loss** ensures fidelity to input images
 - **KL Divergence** enforces a structured, continuous latent space
@@ -72,3 +120,4 @@ Potential extensions include:
 ## Author
 **Ankita**  
 Computer Science | Machine Learning & Representation Learning
+
