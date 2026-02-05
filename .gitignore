@@ -32,7 +32,7 @@ checkpoints/
 *.ckpt
 
 # ===============================
-# Experiments / outputs
+# Experiments / logs
 # ===============================
 experiments/
 runs/
@@ -59,4 +59,3 @@ Thumbs.db
 # ===============================
 .devcontainer/
 docker-compose.yml
-outputs/
