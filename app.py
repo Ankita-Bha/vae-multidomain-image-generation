@@ -232,53 +232,98 @@ with tab3:
 # ----------------------------
 with tab4:
     st.markdown("### Model Evaluation")
-
     col1, col2 = st.columns(2)
 
-    # ---- Left: VAE Loss ----
     with col1:
-        st.subheader("VAE Training Loss")
+        st.subheader("VAE Training Loss (Sharp VAE — Real Data)")
 
-        epochs = np.arange(1, 51)
-        recon = np.exp(-epochs / 15) + 0.1
-        kl = 0.5 * (1 - np.exp(-epochs / 20))
+        # ── REAL numbers from your training logs ──
+        real_loss = {
+            "mnist":   [2759755, 1215020, 1113698, 1059621, 1021342,
+                         992118,  968967,  951817,  937565,  924583,
+                         915095,  905336],
+            "fashion": [3020905, 1922835, 1784209, 1708311, 1661062,
+                        1623802, 1597358, 1574646, 1555683, 1541268,
+                        1527936, 1517140],
+        }
+        real_recon = {
+            "mnist":   [2496538, 941084, 840369, 787309, 750243,
+                         722446, 700161, 683818, 670294, 657818,
+                         648927, 639623],
+            "fashion": [2778740, 1673836, 1535459, 1460079, 1413760,
+                        1377022, 1351030, 1328881, 1310511, 1296527,
+                        1283353, 1273032],
+        }
+        real_kl = {
+            "mnist":   [5264341, 5478731, 5466592, 5446244, 5421996,
+                        5393444, 5376114, 5359982, 5345433, 5335300,
+                        5323354, 5314251],
+            "fashion": [4843311, 4979980, 4975007, 4964628, 4946046,
+                        4935610, 4926549, 4915302, 4903441, 4894822,
+                        4891671, 4882150],
+        }
+
+        ds_key = "fashion" if DATASET == "fashion" else "mnist"
+        epochs_x = list(range(1, len(real_loss[ds_key]) + 1))
+
+        # Normalise to 0-1 scale so both lines are readable on same chart
+        recon_vals = np.array(real_recon[ds_key])
+        kl_vals    = np.array(real_kl[ds_key])
+        recon_norm = recon_vals / recon_vals[0]
+        kl_norm    = kl_vals    / kl_vals[-1]
 
         fig1, ax1 = plt.subplots(figsize=(5, 4))
-        ax1.plot(epochs, recon, label="Reconstruction Loss")
-        ax1.plot(epochs, kl, label="KL Divergence")
-        ax1.set_xlabel("Epochs")
-        ax1.set_ylabel("Loss")
+        ax1.plot(epochs_x, recon_norm, label="Reconstruction Loss (normalised)", color="#3b82f6")
+        ax1.plot(epochs_x, kl_norm,    label="KL Divergence (normalised)",       color="#f59e0b")
+        ax1.set_xlabel("Epoch")
+        ax1.set_ylabel("Loss (normalised to 1.0)")
+        ax1.set_title(f"{DATASET.upper()} — Sharp VAE (12 epochs)")
         ax1.legend()
         ax1.grid(True)
-
         st.pyplot(fig1)
 
+        # Show actual numbers below
         st.caption(
-            "Reconstruction loss decreases as image quality improves, "
-            "while KL divergence stabilizes the latent space."
+            f"Epoch 1 → Recon: {recon_vals[0]:,.0f} | "
+            f"Epoch 12 → Recon: {recon_vals[-1]:,.0f} | "
+            f"Reduction: {(1 - recon_vals[-1]/recon_vals[0])*100:.0f}%"
         )
 
-    # ---- Right: CNN Accuracy ----
     with col2:
-        st.subheader("CNN Accuracy on Generated Images")
+        st.subheader("CNN Accuracy on Real Images (Real Data)")
 
-        classes = list(range(10))
-        accuracy = np.random.uniform(0.75, 0.95, size=10) * 100
+        # ── REAL numbers from your classifier training ──
+        cnn_accuracy = {
+            "mnist": {
+                "per_epoch": [95.85, 98.25, 98.70, 98.83, 99.00,
+                               99.18, 99.22, 99.26],
+                "final": 99.26
+            },
+            "fashion": {
+                "per_epoch": [84.47, 88.78, 90.04, 91.16, 92.02,
+                               92.56, 93.05, 93.73],
+                "final": 93.73
+            },
+        }
+
+        acc_data = cnn_accuracy[ds_key]
+        epochs_cnn = list(range(1, len(acc_data["per_epoch"]) + 1))
 
         fig2, ax2 = plt.subplots(figsize=(5, 4))
-        ax2.bar(classes, accuracy)
-        ax2.set_ylim(0, 100)
-        ax2.set_xlabel("Class")
+        ax2.plot(epochs_cnn, acc_data["per_epoch"],
+                 marker="o", color="#10b981", linewidth=2)
+        ax2.set_ylim(80, 100)
+        ax2.set_xlabel("Epoch")
         ax2.set_ylabel("Accuracy (%)")
-        ax2.grid(axis="y")
-
+        ax2.set_title(f"{DATASET.upper()} — ResNet-18 Classifier (8 epochs)")
+        ax2.grid(True)
         st.pyplot(fig2)
 
-        st.caption(
-            "High accuracy indicates that generated images retain "
-            "class-specific features recognizable by the CNN."
+        st.metric(
+            label=f"Final CNN Accuracy on {DATASET.upper()}",
+            value=f"{acc_data['final']}%"
         )
-
+        st.caption("Trained on real images only. Used to validate generated image quality.")
 # ----------------------------
 # Footer
 # ----------------------------
