@@ -1,191 +1,132 @@
-# VAE Multidomain Image Generation
+<div align="center">
 
-## Overview
-This project explores **image generation and representation learning** using a **Variational Autoencoder (VAE)**, with a strong emphasis on **latent space interpretability and controlled generation** rather than purely visual realism.
+# 🧠 VAE Multidomain Image Generation
 
-In addition to generating images, the project focuses on understanding **how latent representations are learned**, how they can be **manipulated through traversal**, and how generated samples can be **semantically validated** using an independent classifier.
+**A convolutional Variational Autoencoder for multi-dataset image generation, latent space exploration, and CNN-based semantic validation — with an interactive Streamlit dashboard.**
 
-An interactive **Streamlit dashboard** is provided to visualize and analyze these behaviors in real time.
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=flat-square&logo=jupyter&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-013243?style=flat-square&logo=numpy&logoColor=white)
+![Matplotlib](https://img.shields.io/badge/Matplotlib-11557C?style=flat-square&logoColor=white)
 
----
-
-## Key Objectives
-- Build a CNN-based Variational Autoencoder for grayscale image generation  
-- Analyze the structure and smoothness of the learned latent space  
-- Enable controlled image generation via latent traversal  
-- Validate generated images using a CNN-based classifier  
-- Provide explainability through visualization and Grad-CAM  
-- Present quantitative evaluation through training and validation plots  
+</div>
 
 ---
 
-## Datasets
-The project uses standard benchmark datasets commonly employed in generative modeling research:
+## 📖 Overview
 
-- **MNIST** – handwritten digits  
-- **FashionMNIST** – grayscale clothing images  
+This project studies **image generation and representation learning** with a CNN-based Variational Autoencoder trained on grayscale benchmark datasets (MNIST, FashionMNIST, EMNIST). The emphasis is on **latent space interpretability and controlled generation** rather than raw visual realism: latent traversal, class-anchored sampling, and semantic validation of generated images using an independently trained ResNet-18 classifier. An interactive **Streamlit dashboard** ties everything together, including Grad-CAM explanations of the classifier's decisions on generated samples.
 
-All datasets are:
-- 28×28 grayscale  
-- low-resolution by design  
-- suitable for controlled experimentation and latent space analysis  
+## ✨ Features
 
----
+- Convolutional VAE (`ConvVAE`) with a 32-dimensional latent space, plus a sharper low-beta ("SHARP") training variant
+- Multi-dataset training pipeline covering MNIST, FashionMNIST, and EMNIST
+- Exploratory **VAE-GAN** hybrid training on FashionMNIST using an auxiliary discriminator
+- Independent **ResNet-18 CNN classifiers** (1-channel input) trained per dataset for semantic validation of generated images
+- Interactive **latent traversal** via Streamlit sliders — vary one latent dimension while holding the rest fixed
+- **Class-anchored generation** — sample latent vectors from class-specific regions with controlled noise
+- **Grad-CAM heatmaps** explaining classifier predictions on generated images
+- Evaluation notebooks: original-vs-reconstruction grids, random latent samples, classifier prediction distributions over 1,000 generated images, and latent progression across training epochs
 
-## Model Architecture
+## 🛠️ Tech Stack
 
-### Variational Autoencoder (VAE)
-The core generative model is a **Convolutional Variational Autoencoder** consisting of:
+| Category | Technology |
+|----------|------------|
+| Language | Python 3 |
+| Deep Learning | PyTorch, torchvision |
+| Models | Convolutional VAE, VAE-GAN (discriminator), ResNet-18 classifier |
+| Dashboard | Streamlit |
+| Explainability | Grad-CAM |
+| Visualization | Matplotlib |
+| Environment | Jupyter Notebooks |
 
-- **Encoder**
-  - Convolutional layers for feature extraction  
-  - Outputs latent mean (μ) and log-variance (logσ²)  
+## 📂 Project Structure
 
-- **Latent Space**
-  - 32-dimensional continuous representation  
-  - Enables smooth interpolation and controlled sampling  
+```text
+vae-multidomain-image-generation/
+├── app.py                                    # Streamlit dashboard: latent explorer + CNN validation + Grad-CAM
+├── app1.py                                   # Extended/alternative dashboard variant
+├── notebooks/
+│   ├── 01_data/01_data_sanity.ipynb          # Dataset & checkpoint sanity checks
+│   ├── 02_models/01_grayscale_vae_arch.ipynb # VAE architecture definition
+│   ├── 03_training/
+│   │   ├── 01_train_grayscale_vae.ipynb      # Train base + SHARP VAE on MNIST/Fashion/EMNIST
+│   │   ├── 02_train_fashion_vae_gan.ipynb    # Exploratory VAE-GAN on FashionMNIST
+│   │   └── 03_train_classifier.ipynb         # Train ResNet-18 classifiers on real data
+│   ├── 04_evaluation/
+│   │   ├── 01_generate_samples.ipynb         # Sampling & reconstruction grids
+│   │   ├── 02_eval_generated.ipynb           # CNN prediction distribution on generated images
+│   │   └── ieee_figures.ipynb                # Paper-style figures (ieee_outputs/)
+│   └── 05_latent_progression/06_latent_progression.ipynb  # Decoding a fixed z across epochs
+├── src/
+│   ├── models/                               # encoder.py, decoder.py, vae.py, discriminator.py
+│   ├── training/                             # losses.py, scheduler.py
+│   ├── evaluation/                           # reconstruction / interpolation / sampling scripts
+│   ├── config/                               # dataset configs
+│   └── utils/                                # seeding, device, visualization helpers
+├── outputs/                                  # mnist / fashion original-vs-reconstruction grids
+├── LICENSE
+└── README.md
+```
 
-- **Decoder**
-  - Reconstructs images from latent vectors  
-  - Generates new samples via latent sampling  
+## 🚀 Getting Started
 
----
+### Prerequisites
 
-### CNN Classifier (Semantic Validation)
-A **ResNet-18–based CNN** is trained separately on the same datasets and is used to:
+- Python 3.9+
+- PyTorch and torchvision (CPU is sufficient; CUDA used automatically if available)
+- Jupyter Notebook / JupyterLab
+- Streamlit (for the interactive dashboard)
 
-- classify VAE-generated images  
-- measure semantic consistency  
-- validate whether generated samples retain class-specific structure  
+### Installation
 
-The classifier is **not involved in VAE training**, ensuring independent validation.
+```bash
+git clone https://github.com/Ankita-Bha/vae-multidomain-image-generation.git
+cd vae-multidomain-image-generation
+pip install torch torchvision streamlit matplotlib numpy jupyter
+```
 
----
+> Note: trained checkpoints (`checkpoints/grayscale/*.pt`) and raw datasets are excluded from version control — run the training notebooks first to regenerate them.
 
-## Training Objective
-The VAE is trained using the standard Evidence Lower Bound (ELBO):
+### Usage
 
-- **Reconstruction Loss** ensures fidelity to input images  
-- **KL Divergence** enforces a structured, continuous latent space  
+```bash
+# 1. Train the VAEs (MNIST, FashionMNIST, EMNIST)
+jupyter notebook notebooks/03_training/01_train_grayscale_vae.ipynb
 
-The balance between these terms introduces a known trade-off between:
-- visual sharpness  
-- latent space regularization and interpretability  
+# 2. Train the validation classifiers
+jupyter notebook notebooks/03_training/03_train_classifier.ipynb
 
----
+# 3. Generate and evaluate samples
+jupyter notebook notebooks/04_evaluation/01_generate_samples.ipynb
 
-## Latent Space Analysis
-A key component of this project is **latent space exploration**, implemented interactively via Streamlit:
+# 4. Launch the interactive dashboard
+streamlit run app.py
+```
 
-- One or more latent dimensions can be varied using sliders  
-- Remaining dimensions are held constant  
-- Resulting image changes are observed in real time  
+## 📊 Results
 
-This analysis demonstrates that:
-- the latent space is continuous  
-- changes are smooth rather than abrupt  
-- different dimensions encode meaningful visual factors  
+- Training notebooks show stable convergence of the ELBO objective (reconstruction + KL) across all three datasets, for both the base VAE and the low-beta SHARP variant.
+- `outputs/` contains original-vs-reconstruction grids for MNIST and FashionMNIST — reconstructions are recognizable with the mild blur characteristic of pixel-wise VAE objectives.
+- The evaluation notebook classifies 1,000 randomly generated FashionMNIST samples with the independent ResNet-18 and reports the full prediction distribution, honestly surfacing mode concentration in unconditioned sampling (most samples map to a single class).
+- Latent traversal in the dashboard demonstrates a smooth, continuous latent space where individual dimensions encode distinct visual factors.
 
----
+## 🔮 Future Improvements
 
-## Class-Anchored Generation
-In addition to free latent exploration, the project supports **class-anchored sampling**:
+- Conditional VAE (CVAE) to directly address mode concentration in free sampling
+- Higher-resolution color datasets (e.g., CelebA — a config stub already exists)
+- Quantitative generation metrics such as FID/IS alongside classifier-based validation
+- Comparison against diffusion-based generators
+- Consolidate notebook training logic into the `src/training` package with CLI entry points
 
-- Latent vectors are sampled from class-specific regions  
-- Controlled noise is added to introduce variation  
-- Generated images remain human-recognisable  
+## 👤 Author
 
-This mode highlights how class information is implicitly embedded within the latent space.
-
----
-
-## Explainability with Grad-CAM
-To enhance interpretability, the project applies **Grad-CAM** to the CNN classifier:
-
-- Heatmaps highlight image regions influencing predictions  
-- Provides visual justification for CNN decisions on generated images  
-
-Grad-CAM explains **why the CNN predicts a class**, not how the VAE generates the image.
-
----
-
-## Evaluation and Results
-
-### Qualitative Results
-- Generated images are recognisable but slightly blurred  
-- This behavior is expected in VAEs due to:
-  - probabilistic decoding  
-  - pixel-wise reconstruction objectives  
-  - low-resolution datasets  
-
-### Quantitative Results
-The Streamlit dashboard includes:
-- **VAE training loss curves**
-  - reconstruction loss  
-  - KL divergence  
-- **CNN accuracy on VAE-generated images**
-
-These results demonstrate:
-- stable VAE training  
-- structured latent space learning  
-- meaningful semantic retention in generated samples  
-
----
-
-## Interactive Dashboard
-A Streamlit application is included to demonstrate:
-
-- latent traversal  
-- class-anchored image generation  
-- CNN predictions with confidence scores  
-- Grad-CAM visual explanations  
-- evaluation plots  
-
-The dashboard allows both technical and non-technical users to understand the model’s behavior.
+**Ankita Bhamidimarri** — [@Ankita-Bha](https://github.com/Ankita-Bha)
 
 ---
 
-## Project Status
-Completed components include:
-- CNN-based VAE implementation and training  
-- Latent space traversal and analysis  
-- Class-anchored image generation  
-- CNN-based semantic validation  
-- Grad-CAM explainability  
-- Interactive Streamlit dashboard  
-- Evaluation plots and documentation  
-
-The project is considered **feature-complete**.
-
----
-
-## Research Significance
-This project demonstrates:
-- effective unsupervised representation learning  
-- interpretable latent space structure  
-- controlled generative modeling  
-- principled evaluation of generative outputs  
-
-The focus on explainability and limitations aligns with research themes in **representation learning** and **unsupervised deep learning**.
-
----
-
-## Future Work
-Potential extensions include:
-- Conditional Variational Autoencoders (CVAE)  
-- Joint VAE–classifier training  
-- Higher-resolution datasets (e.g., CelebA)  
-- Comparative analysis with GANs or diffusion models  
-
----
-
-## Reproducibility Notes
-- Raw datasets and trained model weights are excluded from version control  
-- The repository contains source code, notebooks, static outputs, and documentation  
-- Experiments can be reproduced by retraining locally  
-
----
-
-## Author
-**Ankita**  
-Computer Science | Machine Learning | Representation Learning
+<div align="center">
+<sub>⭐ If you found this project useful, consider giving it a star!</sub>
+</div>
